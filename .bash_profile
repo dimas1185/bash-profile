@@ -60,24 +60,39 @@ ${C_BK_DARKGRAY}${C_BLACK}\t${C_BK_CYAN2}${C_DARKGRAY}${TRIANGLE}\
 ${E_BOLD}${C_BK_CYAN2}${C_BLACK}\u${C_DEFAULT}${C_BK_DARKGRAY}${C_CYAN2}${TRIANGLE}\
 ${C_BLACK}\h${C_DEFAULT}${C_DARKGRAY}${TRIANGLE} \
 ${C_LIGHTGREEN2}\w${C_DEFAULT} \
-\$(git_parse_branch)\n"
+\$(git-parse-branch)\n"
 
 DIR="$(dirname "$(realpath "${BASH_SOURCE[0]}")")"
 
+#--------------------------------math---------------------------
+#simple wrapper for math. using bc as it handles big numbers
+function c {
+   #if there is % in the expression that measn we want division reminder hence no floating point operations
+   if [[ -n $(grep "%" <<< "$@") ]]
+   then
+      SCALE=0
+   else
+      SCALE=8
+   fi
+   RESULT=$(bc <<< "scale=$SCALE; ${@}")
+   #removing trailing zeros
+   RESULT=$(sed 's/0*$//' <<< $RESULT)
+   #removing trailing dot
+   RESULT=$(sed 's/\.$//' <<< $RESULT)
+   #adding leading zero
+   RESULT=$(sed 's/^\./0\./' <<< $RESULT)
+   echo "$RESULT"
+   set +f
+}
+#set -f have to happen before parameters expansion so doing this in alias
+#and unsetting this option inside function c as alias can't be prefixed
+alias c='set -f; c'
 #--------------------------------user specific variables--------
 . $DIR/.exports
-
-#--------------------------------system helper------------------
-
-#kill all processes by name
-function killp {
-   ps aux | grep $1 | grep -v grep | awk '{print $2}' | xargs kill
-}
 
 #--------------------------------common aliases-----------------
 
 alias grep="grep --color=auto"
-
 
 #--------------------------------homebrew-----------------------
 
@@ -88,10 +103,18 @@ export HOMEBREW_EDITOR=code
 function brew-tap-formulas { 
    brew tap-info --json "$@" | jq -r '.[]|(.formula_names[],.cask_tokens[])' | sort -V 
 }
+
+function brew-update-all {
+   brew update && brew upgrade
+}
+
 #--------------------------------PATH---------------------------
-#forcing to use openssl
-#
-export PATH="~/Work/fill-queue/build:~/Work/eos/build/bin/:$(brew --prefix openssl)/bin:/usr/local/opt/rabbitmq/sbin:/usr/local/sbin:$PATH"
+PATH="~/Work/fill-queue/build:$PATH"
+PATH="~/Work/eos/build/bin/:$PATH"
+PATH="$(brew --prefix openssl)/bin:$PATH"
+PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
+export PATH="/usr/local/sbin:$PATH"
+
 export LIBRARY_PATH="/usr/local/opt/icu4c/lib:${LIBRARY_PATH}"
 #--------------------------------hub----------------------------
 
@@ -108,43 +131,52 @@ export GPG_TTY=$(tty)
 
 #--------------------------------Git----------------------------
 
-git_parse_branch() {
+git-parse-branch() {
     BRANCH=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
     if [[ -n $BRANCH ]]
     then
-      GIT_COMMITS_DATA=$(git rev-list --left-right --count origin/${BRANCH}...@)
-      COMMITS_BEHIND=$(echo "$GIT_COMMITS_DATA" | cut -f1)
-      COMMIT_AHEAD=$(echo "$GIT_COMMITS_DATA" | cut -f2)
-      COMMITS_TEXT=${C_RED2}${COMMITS_BEHIND_ICON}${C_BLACK}${COMMITS_BEHIND}
-      if (($COMMIT_AHEAD > $COMMITS_BEHIND))
+      if [[ -n $(git checkout | grep "Your branch is") ]]
       then
-         COMMITS_TEXT=${C_GREEN2}${COMMITS_AHEAD_ICON}${C_BLACK}${COMMIT_AHEAD}
-      elif (($COMMIT_AHEAD == $COMMITS_BEHIND))
-      then
-         COMMITS_TEXT=${C_GREEN2}${CHECK_MARK}
+         BRANCH_TRIM=$(sed 's/(HEAD detached at \(.*\))/\1/' <<< $BRANCH)
+         if [[ "$BRANCH_TRIM" != "$BRANCH" ]]
+         then
+            DETACHED_COMMIT=$(git rev-list -n 1 $BRANCH_TRIM)
+         fi
+         COMMIT_NAME=${DETACHED_COMMIT:-origin/$BRANCH}
+         GIT_COMMITS_DATA=$(git rev-list --left-right --count "${COMMIT_NAME}"...@)
+         COMMITS_BEHIND=$(echo "$GIT_COMMITS_DATA" | cut -f1)
+         COMMIT_AHEAD=$(echo "$GIT_COMMITS_DATA" | cut -f2)
+         COMMITS_TEXT=${C_RED2}${COMMITS_BEHIND_ICON}${C_BLACK}${COMMITS_BEHIND}
+         if (($COMMIT_AHEAD > $COMMITS_BEHIND))
+         then
+            COMMITS_TEXT=${C_GREEN2}${COMMITS_AHEAD_ICON}${C_BLACK}${COMMIT_AHEAD}
+         elif (($COMMIT_AHEAD == $COMMITS_BEHIND))
+         then
+            COMMITS_TEXT=${C_GREEN2}${CHECK_MARK}
+         fi
       fi
       echo -e -n "${C_DEFAULT}${C_ORANGE}${LEFT_TRIANGLE}${C_BLACK}${C_BK_ORANGE} ${BRANCH_ICON}${BRANCH} ${COMMITS_TEXT} ${C_DEFAULT}${C_ORANGE}${TRIANGLE}${C_DEFAULT}"
     fi
 }
 
-git_delete_branch() {
+git-delete-branch() {
    echo "deleting $1 branch locally..."
    git branch -D $1
    echo "deleting $1 branch remotely..."
    git push origin --delete $1
 }
 
-git_modules_update() {
+git-modules-update() {
    git submodule update --init --recursive
 }
 
-git_clone() {
+git-clone() {
    git clone git@github.com:${@}
 }
 
 #--------------------------------EOS-----------------------------
 
-sign_nodeos() {
+sign-nodeos() {
    codesign -f -s $APPLE_ID $HOME/Work/eos/build/bin/nodeos
    codesign -f -s $APPLE_ID $HOME/Work/eos_copy/build/bin/nodeos
 }
@@ -160,3 +192,8 @@ bk() {
 docker-rm-image() {
    docker images | awk 'NR>1 {print $1 $3}' | grep $1 | awk '{print $2}' | xargs docker rmi
 }
+
+#--------------------------------nvm-----------------------------
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
