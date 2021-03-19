@@ -111,7 +111,7 @@ function brew-update-all {
 #--------------------------------PATH---------------------------
 PATH="~/Work/fill-queue/build:$PATH"
 PATH="~/Work/eos/build/bin/:$PATH"
-PATH="$(brew --prefix openssl)/bin:$PATH"
+PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
@@ -174,6 +174,9 @@ git-clone() {
    git clone git@github.com:${@}
 }
 
+#autocompletion stuff
+[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
+
 #--------------------------------EOS-----------------------------
 
 sign-nodeos() {
@@ -195,5 +198,6 @@ docker-rm-image() {
 
 #--------------------------------nvm-----------------------------
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+# #nvm takes like 2-3 sec to load so skipping its load by default
+# #export NVM_DIR="$HOME/.nvm"
+# #[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
