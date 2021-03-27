@@ -204,14 +204,14 @@ docker-rm-image() {
 
 #--------------------------------transmission--------------------
 
-alias t-start-d='sudo service transmission-daemon start'
-alias t-stop-d='sudo service transmission-daemon stop'
-alias t-reload-d='sudo service transmission-daemon reload'
+alias td-start='brew services start transmission-cli'
+alias td-stop='brew services stop transmission-cli'
+alias td-restart='brew services restart transmission-cli'
 alias t-list='transmission-remote -l'
 alias t-basicstats='transmission-remote -st'
 alias t-fullstats='transmission-remote -si'
 alias t-add='transmission-remote -a'
-alias t-start='transmission-remote -s'
+alias t-start='transmission-remote --torrent all --start'
 
 function t-clean {
    DOWNLOAD_DIR=$(cat "/usr/local/var/transmission/settings.json" | jq -r '."download-dir"')
