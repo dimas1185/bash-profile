@@ -233,3 +233,27 @@ if [ -f '/Users/dmytro.sydorchenko/google-cloud-sdk/completion.bash.inc' ]; then
 # --------------------------------default editor------------------
 
 export EDITOR="code -w"
+#--------------------------------transmission--------------------
+
+alias td-start='brew services start transmission-cli'
+alias td-stop='brew services stop transmission-cli'
+alias td-restart='brew services restart transmission-cli'
+alias t-list='transmission-remote -l'
+alias t-basicstats='transmission-remote -st'
+alias t-fullstats='transmission-remote -si'
+alias t-add='transmission-remote -a'
+alias t-start='transmission-remote --torrent all --start'
+
+function t-clean {
+   DOWNLOAD_DIR=$(cat "/usr/local/var/transmission/settings.json" | jq -r '."download-dir"')
+   ID_NAME_MAP=$(t-list | awk '{print $1,$10}' | grep -e "^[0-9]\+" | sed 's/^\([0-9]\{1,\}\)[^[[:space:]]]*[[:space:]]/\1 /')
+   while read line
+   do
+      ID=$(awk '{print $1}' <<< $line)
+      NAME=$(awk '{print $2}' <<< $line)
+      if [[ -z $(find "${DOWNLOAD_DIR}" -name "${NAME}*") ]]
+      then
+         transmission-remote -t $ID -r
+      fi
+   done <<< $ID_NAME_MAP
+}
