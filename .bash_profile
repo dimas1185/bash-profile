@@ -135,7 +135,7 @@ git-parse-branch() {
     BRANCH=$(git branch 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/')
     if [[ -n $BRANCH ]]
     then
-      if [[ -n $(git checkout | grep "Your branch is") ]]
+      if [[ -n $(git checkout | grep "Your branch") ]]
       then
          BRANCH_TRIM=$(sed 's/(HEAD detached at \(.*\))/\1/' <<< $BRANCH)
          if [[ "$BRANCH_TRIM" != "$BRANCH" ]]
