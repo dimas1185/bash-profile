@@ -193,7 +193,19 @@ bk() {
 #--------------------------------docker--------------------------
 
 docker-rm-image() {
-   docker images | awk 'NR>1 {print $1 $3}' | grep $1 | awk '{print $2}' | xargs docker rmi
+   IMAGES=$(docker images | awk 'NR>1 {print $1, $3}')
+   for var in "$@"
+   do
+      echo "$IMAGES" | grep "$var" | awk '{print $2}' | xargs docker rmi
+   done
+}
+
+docker-c-ls() {
+   docker container ls --all
+}
+
+docker-c-cleanup() {
+   docker container ls --all --format "table {{.Names}}" | awk 'NR>1 {print $1}' | xargs docker rm
 }
 
 #--------------------------------nvm-----------------------------
