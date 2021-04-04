@@ -220,7 +220,7 @@ function t-clean {
    do
       ID=$(awk '{print $1}' <<< $line)
       NAME=$(awk '{print $2}' <<< $line)
-      if [[ ! -f "${DOWNLOAD_DIR}/$NAME" ]]
+      if [[ -z $(find "${DOWNLOAD_DIR}" -name "${NAME}*") ]]
       then
          transmission-remote -t $ID -r
       fi
