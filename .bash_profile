@@ -111,8 +111,10 @@ function brew-update-all {
 #--------------------------------PATH---------------------------
 PATH="~/Work/fill-queue/build:$PATH"
 PATH="~/Work/eos/build/bin/:$PATH"
+PATH="~/Work/eosio.cdt/build/bin/:$PATH"
 PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
+PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
 export LIBRARY_PATH="/usr/local/opt/icu4c/lib:${LIBRARY_PATH}"
@@ -172,6 +174,10 @@ git-modules-update() {
 
 git-clone() {
    git clone git@github.com:${@}
+}
+
+git-list-tags() {
+   git log --tags --simplify-by-decoration --pretty="format:%cs %d" --no-walk | grep -P "(?<=tag: )([A-Za-z0-9\/\.\-_]*)"
 }
 
 #autocompletion stuff
