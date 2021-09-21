@@ -110,7 +110,7 @@ function brew-update-all {
 
 #--------------------------------PATH---------------------------
 PATH="~/Work/fill-queue/build:$PATH"
-PATH="~/Work/eos/build/bin/:$PATH"
+PATH="~/Work/eos_copy/build/bin/:$PATH"
 PATH="~/Work/eosio.cdt/build/bin/:$PATH"
 PATH="~/Work/b1x-fill-kafka/build:$PATH"
 PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
