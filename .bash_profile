@@ -75,13 +75,13 @@ function c {
       SCALE=8
    fi
    RESULT=$(bc <<< "scale=$SCALE; ${@}")
-   #removing trailing zeros
-   RESULT=$(sed 's/0*$//' <<< $RESULT)
-   #removing trailing dot
+   #removing trailing zeros after dot
+   RESULT=$(sed 's/\(\.[0-9]*[1-9]\)0*$/\1/' <<< $RESULT)
+   #removing trailing dot for float number
    RESULT=$(sed 's/\.$//' <<< $RESULT)
-   #adding leading zero
+   #adding leading zero to float number
    RESULT=$(sed 's/^\./0\./' <<< $RESULT)
-   echo "$RESULT"
+   numfmt --grouping $RESULT
    set +f
 }
 #set -f have to happen before parameters expansion so doing this in alias
@@ -110,7 +110,7 @@ function brew-update-all {
 
 #--------------------------------PATH---------------------------
 PATH="~/Work/fill-queue/build:$PATH"
-PATH="~/Work/eos/build/bin/:$PATH"
+PATH="~/Work/eos_copy/build/bin/:$PATH"
 PATH="~/Work/eosio.cdt/build/bin/:$PATH"
 PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
