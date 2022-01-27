@@ -110,14 +110,18 @@ function brew-update-all {
 
 #--------------------------------PATH---------------------------
 PATH="~/Work/fill-queue/build:$PATH"
-PATH="~/Work/eos_copy/build/bin/:$PATH"
+PATH="~/Work/eos/build/bin/:$PATH"
 PATH="~/Work/eosio.cdt/build/bin/:$PATH"
+PATH="~/Work/b1x-fill-kafka/build:$PATH"
 PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
 PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
 PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
 export LIBRARY_PATH="/usr/local/opt/icu4c/lib:${LIBRARY_PATH}"
+
+export WASM_LLVM_CONFIG="~/Work/eosio.cdt/build/eosio_llvm/tools/llvm-config"
+export LLVM_DIR="~/Work/eosio.cdt/build/eosio_llvm/lib/cmake/llvm"
 #--------------------------------hub----------------------------
 
 #eval "$(hub alias -s)"
@@ -169,7 +173,7 @@ git-delete-branch() {
 }
 
 git-modules-update() {
-   git submodule update --init --recursive
+   git submodule update --init --recursive $1
 }
 
 git-clone() {
@@ -219,3 +223,13 @@ docker-c-cleanup() {
 # #nvm takes like 2-3 sec to load so skipping its load by default
 # #export NVM_DIR="$HOME/.nvm"
 # #[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# The next line updates PATH for the Google Cloud SDK.
+if [ -f '/Users/dmytro.sydorchenko/google-cloud-sdk/path.bash.inc' ]; then . '/Users/dmytro.sydorchenko/google-cloud-sdk/path.bash.inc'; fi
+
+# The next line enables shell command completion for gcloud.
+if [ -f '/Users/dmytro.sydorchenko/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/dmytro.sydorchenko/google-cloud-sdk/completion.bash.inc'; fi
+
+# --------------------------------default editor------------------
+
+export EDITOR="code -w"
