@@ -101,6 +101,8 @@ alias grep="grep --color=auto"
 PATH="~/work/leap/build/bin/:$PATH"
 export PATH="~/work/cdt/build/bin/:$PATH"
 
+export CDT_BUILD_PATH="~/work/cdt/build/bin"
+
 #---------------------------------------------------------------
 
 #--------------------------------GitHub-------------------------
