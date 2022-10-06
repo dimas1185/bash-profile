@@ -44,9 +44,12 @@ C_BG_LIGHTGRAY="\033[47m"
 
 
 
-export CLICOLOR=1
-export LSCOLORS=cxGxFxDxBxegedabagcxcx
+#-------------------------------ls------------------------------
+export LS_COLORS=$(vivid generate one-dark)
 
+alias ls="ls --color=auto"
+
+#--------------------------------PS-----------------------------
 C_CUST_LIGHT_BLUE="\e[38;5;027m\]"
 TRIANGLE=$'\uE0B0'
 LEFT_TRIANGLE=$'\uE0B2'
@@ -94,41 +97,14 @@ alias c='set -f; c'
 
 alias grep="grep --color=auto"
 
-#--------------------------------homebrew-----------------------
-
-export HOMEBREW_NO_AUTO_UPDATE=1
-
-export HOMEBREW_EDITOR=code
-
-function brew-tap-formulas { 
-   brew tap-info --json "$@" | jq -r '.[]|(.formula_names[],.cask_tokens[])' | sort -V 
-}
-
-function brew-update-all {
-   brew update && brew upgrade
-}
-
 #--------------------------------PATH---------------------------
-PATH="~/Work/fill-queue/build:$PATH"
-PATH="~/Work/eos_copy/build/bin/:$PATH"
-PATH="~/Work/eosio.cdt/build/bin/:$PATH"
-PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
-PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
-export PATH="/usr/local/sbin:$PATH"
-
-export LIBRARY_PATH="/usr/local/opt/icu4c/lib:${LIBRARY_PATH}"
-#--------------------------------hub----------------------------
-
-#eval "$(hub alias -s)"
+PATH="~/work/leap/build/bin/:$PATH"
+export PATH="~/work/cdt/build/bin/:$PATH"
 
 #---------------------------------------------------------------
 
-#--------------------------------suppress zsh warning-----------
-export BASH_SILENCE_DEPRECATION_WARNING=1
-
 #--------------------------------GitHub-------------------------
-ssh-add -K ~/.ssh/github.key 2>/dev/null
+ssh-add ~/.ssh/id_ed25519 2>/dev/null
 export GPG_TTY=$(tty)
 
 #--------------------------------Git----------------------------
@@ -181,20 +157,7 @@ git-list-tags() {
 }
 
 #autocompletion stuff
-[[ -r "/usr/local/etc/profile.d/bash_completion.sh" ]] && . "/usr/local/etc/profile.d/bash_completion.sh"
-
-#--------------------------------EOS-----------------------------
-
-sign-nodeos() {
-   codesign -f -s $APPLE_ID $HOME/Work/eos/build/bin/nodeos
-   codesign -f -s $APPLE_ID $HOME/Work/eos_copy/build/bin/nodeos
-}
-
-#--------------------------------buildkite-----------------------
-
-bk() {
-   curl -fsSL -H "Authorization: Bearer $BUILDKITE_API_KEY" "https://api.buildkite.com/$1"
-}
+[[ -r "/etc/profile.d/bash_completion.sh" ]] && . "/etc/profile.d/bash_completion.sh"
 
 #--------------------------------docker--------------------------
 
@@ -219,28 +182,3 @@ docker-c-cleanup() {
 # #nvm takes like 2-3 sec to load so skipping its load by default
 # #export NVM_DIR="$HOME/.nvm"
 # #[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-
-#--------------------------------transmission--------------------
-
-alias td-start='brew services start transmission-cli'
-alias td-stop='brew services stop transmission-cli'
-alias td-restart='brew services restart transmission-cli'
-alias t-list='transmission-remote -l'
-alias t-basicstats='transmission-remote -st'
-alias t-fullstats='transmission-remote -si'
-alias t-add='transmission-remote -a'
-alias t-start='transmission-remote --torrent all --start'
-
-function t-clean {
-   DOWNLOAD_DIR=$(cat "/usr/local/var/transmission/settings.json" | jq -r '."download-dir"')
-   ID_NAME_MAP=$(t-list | awk '{print $1,$10}' | grep -e "^[0-9]\+" | sed 's/^\([0-9]\{1,\}\)[^[[:space:]]]*[[:space:]]/\1 /')
-   while read line
-   do
-      ID=$(awk '{print $1}' <<< $line)
-      NAME=$(awk '{print $2}' <<< $line)
-      if [[ -z $(find "${DOWNLOAD_DIR}" -name "${NAME}*") ]]
-      then
-         transmission-remote -t $ID -r
-      fi
-   done <<< $ID_NAME_MAP
-}
