@@ -180,6 +180,13 @@ docker-c-cleanup() {
    docker container ls --all --format "table {{.Names}}" | awk 'NR>1 {print $1}' | xargs docker rm
 }
 
+#--------------------------------restart-mouse-------------------
+
+mouse-restart() {
+   sudo modprobe -r psmouse
+   sudo modprobe psmouse
+}
+
 #--------------------------------nvm-----------------------------
 
 # #nvm takes like 2-3 sec to load so skipping its load by default
