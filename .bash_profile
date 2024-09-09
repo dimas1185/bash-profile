@@ -109,24 +109,10 @@ function brew-update-all {
 }
 
 #--------------------------------PATH---------------------------
-PATH="~/Work/fill-queue/build:$PATH"
-PATH="~/Work/eos_copy/build/bin/:$PATH"
-PATH="~/Work/eosio.cdt/build/bin/:$PATH"
-PATH="~/Work/b1x-fill-kafka/build:$PATH"
-PATH="/usr/local/opt/openssl@1.1/bin:$PATH"
-PATH="/usr/local/opt/rabbitmq/sbin:$PATH"
 PATH="/usr/local/opt/grep/libexec/gnubin:$PATH"
 export PATH="/usr/local/sbin:$PATH"
 
 export LIBRARY_PATH="/usr/local/opt/icu4c/lib:${LIBRARY_PATH}"
-
-export WASM_LLVM_CONFIG="~/Work/eosio.cdt/build/eosio_llvm/tools/llvm-config"
-export LLVM_DIR="~/Work/eosio.cdt/build/eosio_llvm/lib/cmake/llvm"
-#--------------------------------hub----------------------------
-
-#eval "$(hub alias -s)"
-
-#---------------------------------------------------------------
 
 #--------------------------------suppress zsh warning-----------
 export BASH_SILENCE_DEPRECATION_WARNING=1
@@ -218,42 +204,6 @@ docker-c-cleanup() {
    docker container ls --all --format "table {{.Names}}" | awk 'NR>1 {print $1}' | xargs docker rm
 }
 
-#--------------------------------nvm-----------------------------
-
-# #nvm takes like 2-3 sec to load so skipping its load by default
-# #export NVM_DIR="$HOME/.nvm"
-# #[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
-
-# The next line updates PATH for the Google Cloud SDK.
-if [ -f '/Users/dmytro.sydorchenko/google-cloud-sdk/path.bash.inc' ]; then . '/Users/dmytro.sydorchenko/google-cloud-sdk/path.bash.inc'; fi
-
-# The next line enables shell command completion for gcloud.
-if [ -f '/Users/dmytro.sydorchenko/google-cloud-sdk/completion.bash.inc' ]; then . '/Users/dmytro.sydorchenko/google-cloud-sdk/completion.bash.inc'; fi
-
 # --------------------------------default editor------------------
 
 export EDITOR="code -w"
-#--------------------------------transmission--------------------
-
-alias td-start='brew services start transmission-cli'
-alias td-stop='brew services stop transmission-cli'
-alias td-restart='brew services restart transmission-cli'
-alias t-list='transmission-remote -l'
-alias t-basicstats='transmission-remote -st'
-alias t-fullstats='transmission-remote -si'
-alias t-add='transmission-remote -a'
-alias t-start='transmission-remote --torrent all --start'
-
-function t-clean {
-   DOWNLOAD_DIR=$(cat "/usr/local/var/transmission/settings.json" | jq -r '."download-dir"')
-   ID_NAME_MAP=$(t-list | awk '{print $1,$10}' | grep -e "^[0-9]\+" | sed 's/^\([0-9]\{1,\}\)[^[[:space:]]]*[[:space:]]/\1 /')
-   while read line
-   do
-      ID=$(awk '{print $1}' <<< $line)
-      NAME=$(awk '{print $2}' <<< $line)
-      if [[ -z $(find "${DOWNLOAD_DIR}" -name "${NAME}*") ]]
-      then
-         transmission-remote -t $ID -r
-      fi
-   done <<< $ID_NAME_MAP
-}
